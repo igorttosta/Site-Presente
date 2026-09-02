@@ -18,9 +18,7 @@ export async function createAlbum(
   _prevState: CreateAlbumState,
   formData: FormData
 ): Promise<CreateAlbumState> {
-  const cookieStore = await cookies();
-  const token = cookieStore.get(SESSION_COOKIE)?.value;
-  const session = token ? await verifySessionToken(token).catch(() => null) : null;
+  const session = await requireSession();
   if (!session) {
     return { error: "Sessão expirada. Faça login de novo." };
   }
@@ -32,15 +30,69 @@ export async function createAlbum(
     return { error: "Dá um nome pro álbum." };
   }
 
+  const last = await prisma.album.findFirst({ orderBy: { ordem: "desc" } });
+  const ordem = (last?.ordem ?? -1) + 1;
+
   await prisma.album.create({
     data: {
       titulo,
       descricao: descricao || null,
       userId: session.userId,
+      ordem,
     },
   });
 
   redirect("/albums");
+}
+
+export async function deleteAlbum(albumId: number) {
+  const session = await requireSession();
+  if (!session) {
+    throw new Error("Sessão expirada. Faça login de novo.");
+  }
+
+  const album = await prisma.album.findFirst({
+    where: { id: albumId },
+    include: { photos: true },
+  });
+  if (!album) {
+    throw new Error("Álbum não encontrado.");
+  }
+
+  await Promise.all(
+    album.photos
+      .filter((photo) => photo.publicId)
+      .map((photo) => cloudinary.uploader.destroy(photo.publicId!).catch(() => {}))
+  );
+
+  await prisma.album.delete({ where: { id: albumId } });
+}
+
+export async function moveAlbum(albumId: number, direction: "up" | "down") {
+  const session = await requireSession();
+  if (!session) {
+    throw new Error("Sessão expirada. Faça login de novo.");
+  }
+
+  const album = await prisma.album.findFirst({ where: { id: albumId } });
+  if (!album) {
+    throw new Error("Álbum não encontrado.");
+  }
+
+  const neighbor = await prisma.album.findFirst({
+    where: {
+      ordem: direction === "up" ? { lt: album.ordem } : { gt: album.ordem },
+    },
+    orderBy: { ordem: direction === "up" ? "desc" : "asc" },
+  });
+  if (!neighbor) {
+    return;
+  }
+
+  await prisma.$transaction([
+    prisma.album.update({ where: { id: album.id }, data: { ordem: neighbor.ordem } }),
+    prisma.album.update({ where: { id: neighbor.id }, data: { ordem: album.ordem } }),
+  ]);
 }
 
 export type CreatePhotoState = { error: string };
@@ -49,9 +101,7 @@ export async function createPhoto(
   _prevState: CreatePhotoState,
   formData: FormData
 ): Promise<CreatePhotoState> {
-  const cookieStore = await cookies();
-  const token = cookieStore.get(SESSION_COOKIE)?.value;
-  const session = token ? await verifySessionToken(token).catch(() => null) : null;
+  const session = await requireSession();
   if (!session) {
     return { error: "Sessão expirada. Faça login de novo." };
   }
@@ -69,9 +119,7 @@ export async function createPhoto(
     return { error: "Escolha uma foto antes de salvar." };
   }
 
-  const album = await prisma.album.findFirst({
-    where: { id: albumId, userId: session.userId },
-  });
+  const album = await prisma.album.findFirst({ where: { id: albumId } });
   if (!album) {
     return { error: "Álbum não encontrado." };
   }
@@ -105,9 +153,7 @@ export async function deletePhoto(photoId: number) {
     throw new Error("Sessão expirada. Faça login de novo.");
   }
 
-  const photo = await prisma.photo.findFirst({
-    where: { id: photoId, album: { userId: session.userId } },
-  });
+  const photo = await prisma.photo.findFirst({ where: { id: photoId } });
   if (!photo) {
     throw new Error("Foto não encontrada.");
   }
@@ -127,9 +173,7 @@ export async function movePhoto(photoId: number, direction: "left" | "right") {
     throw new Error("Sessão expirada. Faça login de novo.");
   }
 
-  const photo = await prisma.photo.findFirst({
-    where: { id: photoId, album: { userId: session.userId } },
-  });
+  const photo = await prisma.photo.findFirst({ where: { id: photoId } });
   if (!photo) {
     throw new Error("Foto não encontrada.");
   }

@@ -19,7 +19,7 @@ export default async function AlbumPage({ params }: { params: Promise<{ id: stri
   }
 
   const album = await prisma.album.findFirst({
-    where: { id: albumId, userId: session.userId },
+    where: { id: albumId },
     include: { photos: { orderBy: { ordem: "asc" } } },
   });
 

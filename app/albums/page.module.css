@@ -56,8 +56,8 @@
 
 .row {
   display: flex;
-  align-items: baseline;
-  gap: 0.6rem;
+  align-items: center;
+  gap: 0.7rem;
   padding: 0.85rem 0;
   border-bottom: 1px solid rgb(43 27 36 / 12%);
   color: inherit;
@@ -66,6 +66,46 @@
 
 .row:hover {
   background: rgb(43 27 36 / 4%);
+}
+
+.rowLink {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  flex: 1;
+  min-width: 0;
+  color: inherit;
+  text-decoration: none;
+}
+
+.rowActions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: none;
+}
+
+.rowActions button {
+  background: none;
+  border: none;
+  padding: 0.2rem;
+  font-size: 0.68rem;
+  letter-spacing: 0.03em;
+  color: var(--page-muted);
+  cursor: pointer;
+}
+
+.rowActions button:hover:not(:disabled) {
+  color: var(--page-text);
+}
+
+.rowActions button:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.deleteAlbumButton {
+  color: var(--ribbon) !important;
 }
 
 .idx {

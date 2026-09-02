@@ -16,7 +16,7 @@ export default async function NewPhotoPage({ params }: { params: Promise<{ id: s
   }
 
   const album = await prisma.album.findFirst({
-    where: { id: albumId, userId: session.userId },
+    where: { id: albumId },
   });
   if (!album) {
     notFound();
