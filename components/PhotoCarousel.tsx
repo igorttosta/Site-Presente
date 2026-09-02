@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { deletePhoto, movePhoto } from "@/app/albums/actions";
 import PhotoImage from "./PhotoImage";
@@ -26,8 +26,27 @@ export default function PhotoCarousel({
   albumTitulo: string;
 }) {
   const [index, setIndex] = useState(0);
-  const [isPending, startTransition] = useTransition();
+  const [busy, setBusy] = useState(false);
+  const busyRef = useRef(false);
+  const [, startTransition] = useTransition();
   const router = useRouter();
+
+  function runAction(action: () => Promise<unknown>) {
+    if (busyRef.current) return;
+    busyRef.current = true;
+    setBusy(true);
+    startTransition(async () => {
+      try {
+        await action();
+      } catch {
+        // se algo inesperado falhar, o carrossel ainda é atualizado abaixo
+      } finally {
+        router.refresh();
+        busyRef.current = false;
+        setBusy(false);
+      }
+    });
+  }
 
   useEffect(() => {
     if (index >= photos.length) {
@@ -57,17 +76,11 @@ export default function PhotoCarousel({
     if (!window.confirm("Excluir essa foto? Essa ação não pode ser desfeita.")) {
       return;
     }
-    startTransition(async () => {
-      await deletePhoto(photo.id);
-      router.refresh();
-    });
+    runAction(() => deletePhoto(photo.id));
   }
 
   function handleMove(direction: "left" | "right") {
-    startTransition(async () => {
-      await movePhoto(photo.id, direction);
-      router.refresh();
-    });
+    runAction(() => movePhoto(photo.id, direction));
   }
 
   return (
@@ -150,7 +163,7 @@ export default function PhotoCarousel({
             type="button"
             className={styles.editButton}
             onClick={() => handleMove("left")}
-            disabled={isPending || index === 0}
+            disabled={busy || index === 0}
           >
             mover ◀
           </button>
@@ -159,7 +172,7 @@ export default function PhotoCarousel({
           type="button"
           className={styles.deleteButton}
           onClick={handleDelete}
-          disabled={isPending}
+          disabled={busy}
         >
           excluir
         </button>
@@ -168,7 +181,7 @@ export default function PhotoCarousel({
             type="button"
             className={styles.editButton}
             onClick={() => handleMove("right")}
-            disabled={isPending || index === photos.length - 1}
+            disabled={busy || index === photos.length - 1}
           >
             mover ▶
           </button>

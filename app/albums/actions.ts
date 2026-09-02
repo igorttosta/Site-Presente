@@ -48,7 +48,7 @@ export async function createAlbum(
 export async function deleteAlbum(albumId: number) {
   const session = await requireSession();
   if (!session) {
-    throw new Error("Sessão expirada. Faça login de novo.");
+    return;
   }
 
   const album = await prisma.album.findFirst({
@@ -56,7 +56,8 @@ export async function deleteAlbum(albumId: number) {
     include: { photos: true },
   });
   if (!album) {
-    throw new Error("Álbum não encontrado.");
+    // já foi excluído (ex.: clique duplicado) — não é um erro
+    return;
   }
 
   await Promise.all(
@@ -65,18 +66,18 @@ export async function deleteAlbum(albumId: number) {
       .map((photo) => cloudinary.uploader.destroy(photo.publicId!).catch(() => {}))
   );
 
-  await prisma.album.delete({ where: { id: albumId } });
+  await prisma.album.delete({ where: { id: albumId } }).catch(() => {});
 }
 
 export async function moveAlbum(albumId: number, direction: "up" | "down") {
   const session = await requireSession();
   if (!session) {
-    throw new Error("Sessão expirada. Faça login de novo.");
+    return;
   }
 
   const album = await prisma.album.findFirst({ where: { id: albumId } });
   if (!album) {
-    throw new Error("Álbum não encontrado.");
+    return;
   }
 
   const neighbor = await prisma.album.findFirst({
@@ -92,7 +93,7 @@ export async function moveAlbum(albumId: number, direction: "up" | "down") {
   await prisma.$transaction([
     prisma.album.update({ where: { id: album.id }, data: { ordem: neighbor.ordem } }),
     prisma.album.update({ where: { id: neighbor.id }, data: { ordem: album.ordem } }),
-  ]);
+  ]).catch(() => {});
 }
 
 export type CreatePhotoState = { error: string };
@@ -150,12 +151,13 @@ export async function createPhoto(
 export async function deletePhoto(photoId: number) {
   const session = await requireSession();
   if (!session) {
-    throw new Error("Sessão expirada. Faça login de novo.");
+    return;
   }
 
   const photo = await prisma.photo.findFirst({ where: { id: photoId } });
   if (!photo) {
-    throw new Error("Foto não encontrada.");
+    // já foi excluída (ex.: clique duplicado) — não é um erro
+    return;
   }
 
   if (photo.publicId) {
@@ -164,18 +166,18 @@ export async function deletePhoto(photoId: number) {
     });
   }
 
-  await prisma.photo.delete({ where: { id: photoId } });
+  await prisma.photo.delete({ where: { id: photoId } }).catch(() => {});
 }
 
 export async function movePhoto(photoId: number, direction: "left" | "right") {
   const session = await requireSession();
   if (!session) {
-    throw new Error("Sessão expirada. Faça login de novo.");
+    return;
   }
 
   const photo = await prisma.photo.findFirst({ where: { id: photoId } });
   if (!photo) {
-    throw new Error("Foto não encontrada.");
+    return;
   }
 
   const neighbor = await prisma.photo.findFirst({
@@ -192,5 +194,5 @@ export async function movePhoto(photoId: number, direction: "left" | "right") {
   await prisma.$transaction([
     prisma.photo.update({ where: { id: photo.id }, data: { ordem: neighbor.ordem } }),
     prisma.photo.update({ where: { id: neighbor.id }, data: { ordem: photo.ordem } }),
-  ]);
+  ]).catch(() => {});
 }
