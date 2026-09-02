@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 import { v2 as cloudinary } from "cloudinary";
 import { prisma } from "@/lib/db";
@@ -42,6 +43,7 @@ export async function createAlbum(
     },
   });
 
+  revalidatePath("/albums");
   redirect("/albums");
 }
 
@@ -67,6 +69,7 @@ export async function deleteAlbum(albumId: number) {
   );
 
   await prisma.album.delete({ where: { id: albumId } }).catch(() => {});
+  revalidatePath("/albums");
 }
 
 export async function moveAlbum(albumId: number, direction: "up" | "down") {
@@ -94,6 +97,7 @@ export async function moveAlbum(albumId: number, direction: "up" | "down") {
     prisma.album.update({ where: { id: album.id }, data: { ordem: neighbor.ordem } }),
     prisma.album.update({ where: { id: neighbor.id }, data: { ordem: album.ordem } }),
   ]).catch(() => {});
+  revalidatePath("/albums");
 }
 
 export type CreatePhotoState = { error: string };
@@ -145,6 +149,8 @@ export async function createPhoto(
     },
   });
 
+  revalidatePath("/albums");
+  revalidatePath(`/albums/${albumId}`);
   redirect(`/albums/${albumId}`);
 }
 
@@ -167,6 +173,8 @@ export async function deletePhoto(photoId: number) {
   }
 
   await prisma.photo.delete({ where: { id: photoId } }).catch(() => {});
+  revalidatePath("/albums");
+  revalidatePath(`/albums/${photo.albumId}`);
 }
 
 export async function movePhoto(photoId: number, direction: "left" | "right") {
@@ -195,4 +203,5 @@ export async function movePhoto(photoId: number, direction: "left" | "right") {
     prisma.photo.update({ where: { id: photo.id }, data: { ordem: neighbor.ordem } }),
     prisma.photo.update({ where: { id: neighbor.id }, data: { ordem: photo.ordem } }),
   ]).catch(() => {});
+  revalidatePath(`/albums/${photo.albumId}`);
 }
