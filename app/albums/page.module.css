@@ -1,0 +1,109 @@
+.container {
+  --cover: #2b1b24;
+  --cover-2: #3e2732;
+  --brass: #c9a227;
+  --brass-hover: #e0c471;
+  --brass-dim: #7a6530;
+  --page: #f6ede0;
+  --page-text: #2b1b24;
+  --page-muted: #8a7761;
+  --ribbon: #7a3346;
+
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1.25rem;
+  background: radial-gradient(
+    ellipse 760px 560px at 50% 12%,
+    var(--cover-2),
+    var(--cover) 68%
+  );
+  font-family: var(--font-body), system-ui, sans-serif;
+}
+
+.card {
+  width: 100%;
+  max-width: 32rem;
+  background: var(--page);
+  color: var(--page-text);
+  border-radius: 3px;
+  padding: 2.4rem 2rem;
+  box-shadow: 0 20px 40px -24px rgb(0 0 0 / 60%);
+}
+
+.title {
+  margin: 0 0 1.6rem;
+  font-family: var(--font-display), serif;
+  font-weight: 600;
+  font-size: clamp(1.25rem, 4vw, 1.5rem);
+  letter-spacing: 0.06em;
+  text-align: center;
+  text-wrap: balance;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+}
+
+.empty {
+  padding: 1rem 0 1.6rem;
+  text-align: center;
+  color: var(--page-muted);
+  font-size: 0.9rem;
+}
+
+.row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  padding: 0.85rem 0;
+  border-bottom: 1px solid rgb(43 27 36 / 12%);
+  color: inherit;
+  text-decoration: none;
+}
+
+.row:hover {
+  background: rgb(43 27 36 / 4%);
+}
+
+.idx {
+  font-family: var(--font-display), serif;
+  font-size: 0.78rem;
+  color: var(--brass-dim);
+  flex: none;
+  width: 1.4rem;
+}
+
+.rowTitle {
+  font-family: var(--font-display), serif;
+  font-size: 1rem;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.leader {
+  flex: 1;
+  border-bottom: 1.5px dotted rgb(43 27 36 / 30%);
+  transform: translateY(-4px);
+}
+
+.meta {
+  flex: none;
+  font-size: 0.78rem;
+  color: var(--page-muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.newRow .idx,
+.newRow .rowTitle {
+  color: var(--ribbon);
+}
+
+.newRow .leader {
+  border-bottom-color: rgb(122 51 70 / 35%);
+}

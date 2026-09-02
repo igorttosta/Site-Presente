@@ -1,0 +1,168 @@
+.carousel {
+  position: relative;
+  max-width: 300px;
+  margin: 0 auto;
+}
+
+.frame {
+  position: relative;
+  background: #fff;
+  border: 1px solid rgb(43 27 36 / 10%);
+  border-radius: 2px;
+  padding: 0.6rem;
+}
+
+.image {
+  width: 100%;
+  height: 300px;
+  object-fit: cover;
+  border-radius: 1px;
+  display: block;
+  opacity: 0;
+  animation: fade-in 0.4s ease forwards;
+}
+
+@keyframes fade-in {
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .image {
+    animation: none;
+    opacity: 1;
+  }
+}
+
+.arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: none;
+  background: rgb(43 27 36 / 55%);
+  color: var(--ink, #eee3d2);
+  font-family: var(--font-display), serif;
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.arrow:hover {
+  background: rgb(43 27 36 / 75%);
+}
+
+.arrowLeft {
+  left: 0.9rem;
+}
+
+.arrowRight {
+  right: 0.9rem;
+}
+
+.caption {
+  margin-top: 0.6rem;
+  font-size: 0.82rem;
+  font-style: italic;
+  color: var(--page-text);
+}
+
+.track {
+  margin-top: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  color: var(--page-muted);
+}
+
+.trackName {
+  line-height: 1.4;
+}
+
+.audio {
+  width: 100%;
+  height: 32px;
+}
+
+.spotifyLink {
+  font-size: 1.15rem;
+  line-height: 1;
+  text-decoration: none;
+}
+
+.dots {
+  display: flex;
+  justify-content: center;
+  gap: 0.4rem;
+  margin-top: 0.9rem;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  border: none;
+  padding: 0;
+  background: rgb(43 27 36 / 20%);
+  cursor: pointer;
+}
+
+.dotActive {
+  background: var(--ribbon, #7a3346);
+}
+
+.editRow {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1rem;
+  padding-top: 0.8rem;
+  border-top: 1px solid rgb(43 27 36 / 10%);
+}
+
+.editButton {
+  background: none;
+  border: none;
+  color: var(--page-muted);
+  font-family: var(--font-body), sans-serif;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+}
+
+.editButton:hover:not(:disabled) {
+  color: var(--page-text);
+}
+
+.editButton:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.deleteButton {
+  background: none;
+  border: none;
+  color: var(--ribbon, #7a3346);
+  font-family: var(--font-body), sans-serif;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+}
+
+.deleteButton:hover:not(:disabled) {
+  text-decoration: underline;
+}
+
+.deleteButton:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
